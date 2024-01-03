@@ -2,7 +2,7 @@ const projets = await fetch('http://localhost:5678/api/works').then((projets) =>
 	projets.json()
 );
 
-function createProjet(projet) {
+function creerProjet(projet) {
 	const figure = document.createElement('figure');
 
 	const image = document.createElement('img');
@@ -17,11 +17,11 @@ function createProjet(projet) {
 	return figure;
 }
 
-async function displayProjets(projets) {
+function afficherProjets(projets) {
 	const gallery = document.querySelector('.gallery');
 	try {
 		projets.map((projets) => {
-			gallery.appendChild(createProjet(projets));
+			gallery.appendChild(creerProjet(projets));
 		});
 	} catch (error) {
 		const errorSpan = document.createElement('span');
@@ -32,7 +32,7 @@ async function displayProjets(projets) {
 	}
 }
 
-displayProjets(projets);
+afficherProjets(projets);
 
 // Mise en place du filtrage
 
@@ -46,20 +46,23 @@ function filtrerProjets(projets, id) {
 
 filtres.forEach((filtre) => {
 	filtre.addEventListener('click', (e) => {
+		//Reset du contenu HTML de la gallery
+
 		const gallery = document.querySelector('.gallery');
 		gallery.innerHTML = '';
-		const id = Number(e.target.dataset.id);
 
 		//Ajout de la class active
 
 		document.querySelector('.active')?.classList.remove('active');
-		e.target.classList.add('active');
+		filtre.classList.add('active');
+
+		const id = Number(filtre.dataset.id);
 
 		if (id === 0) {
-			displayProjets(projets);
+			afficherProjets(projets);
 		} else {
 			const projetsFiltres = filtrerProjets(projets, id);
-			displayProjets(projetsFiltres);
+			afficherProjets(projetsFiltres);
 		}
 	});
 });

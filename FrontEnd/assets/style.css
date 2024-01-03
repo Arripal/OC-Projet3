@@ -215,6 +215,10 @@ li:hover {
 .gallery img {
 	width: 100%;
 }
+
+figure figcaption {
+	margin-top: 0.2em;
+}
 #contact {
 	width: 50%;
 	margin: auto;
