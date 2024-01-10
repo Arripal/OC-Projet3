@@ -11,14 +11,43 @@
 		rel="stylesheet">
 	<meta name="description" content="">
 	<link rel="stylesheet" href="./assets/style.css">
-	<script src="./assets/scripts/projets.js" type="module">
+	<script src="./scripts/projets.js" type="module"></script>
 
-
-
-	</script>
 </head>
 
 <body>
+	<aside class="modal-container">
+		<div class="background-modal trigger-modal"></div>
+		<div class="modal" role="dialog">
+			<div class="modal-gallery-content" aria-labelledby="modalPhotosTitle" aria-describedby="galleriePhotos">
+				<button aria-label="close modal" class="close-modal trigger-modal"></button>
+				<h1 id="modalPhotosTitle" class="modal-title">Galerie photos</h1>
+				<section class="modal-gallery modal-content"></section>
+				<div class="ajout-photo">
+					<input class="modal-submit-input modal-add-photo" type="submit" value="Ajouter une photo">
+				</div>
+			</div>
+			<div class="modal-form-content" aria-labelledby="modalFormTitle" aria-describedby="FormAjoutPhotos">
+				<h1 id="modalFormTitle" class="modal-title">Ajout photo</h1>
+				<button aria-label="close modal" class="close-modal trigger-modal"></button>
+				<button class="return-to-gallery"></button>
+				<form id="add-photo" class="modal-content">
+					<input type="file" name="photo" id="photo">
+					<br>
+					<label for="photo-title">Titre</label>
+					<br>
+					<input type="text" id="photo-title">
+					<br>
+					<label for="photo-categorie">Catégorie</label>
+					<br>
+					<input type="text" id="photo-categorie">
+				</form>
+				<input type="submit" value="Valider">
+			</div>
+
+		</div>
+
+	</aside>
 	<header>
 		<h1>
 			Sophie Bluel
@@ -28,7 +57,7 @@
 			<ul>
 				<li>projets</li>
 				<li>contact</li>
-				<li>login</li>
+				<li><a href="login.html" class="login-link">login</a></li>
 				<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
 			</ul>
 		</nav>
@@ -58,9 +87,9 @@
 			</article>
 		</section>
 		<section id="portfolio">
-			<h2>Mes Projets</h2>
+			<h2 class="portfolio-title">Mes Projets</h2>
 			<ul class="filtres">
-				<li class="filtre" data-id="0">
+				<li class="filtre active" data-id="0">
 					Tous
 				</li>
 				<li class="filtre" data-id="1">
@@ -70,7 +99,7 @@
 					Appartements
 				</li>
 				<li class="filtre" data-id="3">
-					Hôtels & restaurants
+					Hôtels &amp restaurants
 				</li>
 			</ul>
 			<div class="gallery">
@@ -99,6 +128,8 @@
 			</ul>
 		</nav>
 	</footer>
+
+	<script defer type="module" src="./scripts/modal.js"></script>
 </body>
 
 </html>
