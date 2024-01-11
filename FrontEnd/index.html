@@ -11,40 +11,51 @@
 		rel="stylesheet">
 	<meta name="description" content="">
 	<link rel="stylesheet" href="./assets/style.css">
-	<script src="./scripts/projets.js" type="module"></script>
+
 
 </head>
 
 <body>
+	<script src="./scripts/projets.js" type="module"></script>
 	<aside class="modal-container">
 		<div class="background-modal trigger-modal"></div>
-		<div class="modal" role="dialog">
-			<div class="modal-gallery-content" aria-labelledby="modalPhotosTitle" aria-describedby="galleriePhotos">
+		<div class="modal" role="dialog" aria-labelledby="modalPhotosTitle" aria-describedby="galleriePhotos">
+			<div class="modal-gallery-content content-wrapper" style="display: block;" id="galleriePhotos">
 				<button aria-label="close modal" class="close-modal trigger-modal"></button>
 				<h1 id="modalPhotosTitle" class="modal-title">Galerie photos</h1>
 				<section class="modal-gallery modal-content"></section>
 				<div class="ajout-photo">
-					<input class="modal-submit-input modal-add-photo" type="submit" value="Ajouter une photo">
+					<input class="modal-submit-input modal-add-photo trigger-modal-content" type="submit"
+						value="Ajouter une photo">
 				</div>
 			</div>
-			<div class="modal-form-content" aria-labelledby="modalFormTitle" aria-describedby="FormAjoutPhotos">
+			<div class="modal-form-content content-wrapper" aria-labelledby="modalFormTitle"
+				aria-describedby="FormAjoutPhotos" style="display: none;">
 				<h1 id="modalFormTitle" class="modal-title">Ajout photo</h1>
 				<button aria-label="close modal" class="close-modal trigger-modal"></button>
-				<button class="return-to-gallery"></button>
+				<button class="return-to-gallery trigger-modal-content"></button>
 				<form id="add-photo" class="modal-content">
-					<input type="file" name="photo" id="photo">
-					<br>
-					<label for="photo-title">Titre</label>
-					<br>
-					<input type="text" id="photo-title">
-					<br>
-					<label for="photo-categorie">Catégorie</label>
-					<br>
-					<input type="text" id="photo-categorie">
-				</form>
-				<input type="submit" value="Valider">
-			</div>
+					<div class="add-file-container">
+						<div class="photo-logo"></div>
+						<label for="photo" class="label-add-photo">+ Ajouter photo</label>
+						<input type="file" name="photo" id="photo" accept="image/png, image/jpeg">
+						<small>jpg, png : 4mo max</small>
+					</div>
 
+					<br>
+					<label for="photo-title" class="modal-label">Titre</label>
+					<br>
+					<input type="text" id="photo-title" class="modal-input">
+					<br>
+					<label for="photo-categorie" class="modal-label">Catégorie</label>
+					<br>
+					<select name="" id="photo-categorie" class="modal-input"></select>
+				</form>
+				<div class="ajout-photo">
+					<input type="submit" value="Valider">
+				</div>
+
+			</div>
 		</div>
 
 	</aside>

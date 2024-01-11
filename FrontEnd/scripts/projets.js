@@ -31,11 +31,11 @@ export function creerProjet(projet) {
 	return figure;
 }
 
-export function afficherProjets(projets, gallery, constructor_fn) {
+export function afficherProjets(projets, gallery, creerProjetFn) {
 	try {
 		const projets_array = Array.from(projets);
 		projets_array.map((projet) => {
-			gallery.appendChild(constructor_fn(projet));
+			gallery.appendChild(creerProjetFn(projet));
 		});
 	} catch (error) {
 		const error_message = document.createElement('span');

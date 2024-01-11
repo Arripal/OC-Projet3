@@ -352,6 +352,7 @@ footer nav ul {
 /******* Modal *******/
 
 .modal-container {
+	display: none;
 	position: fixed;
 	top: 0;
 	right: 0;
@@ -376,7 +377,6 @@ footer nav ul {
 	width: 95%;
 	width: 630px;
 	height: 688px;
-	padding: 30px;
 	background: white;
 	border-radius: 10px;
 	position: absolute;
@@ -391,7 +391,7 @@ footer nav ul {
 	font-size: 26px;
 	color: #000000;
 	font-weight: 400;
-	margin-top: 35px;
+	padding: 35px 0;
 }
 
 .close-modal {
@@ -415,11 +415,10 @@ footer nav ul {
 }
 
 .modal-content {
-	margin-right: 100px;
-	margin-left: 100px;
+	margin: 0 auto;
 	margin-bottom: 55px;
-	padding-bottom: 65px;
-	width: fit-content;
+	padding-bottom: 45px;
+	max-width: 420px;
 	border-bottom: 1px solid #b3b3b3;
 }
 
@@ -472,8 +471,14 @@ footer nav ul {
 	height: 36px;
 	cursor: pointer;
 }
-
+.content-wrapper {
+	padding-top: 20px;
+}
 /******** Modal Form Content ***********/
+
+.modal-form-content {
+	padding: 0;
+}
 
 .return-to-gallery {
 	background: url('./icons/arrow-left.png');
@@ -485,9 +490,76 @@ footer nav ul {
 	position: absolute;
 	top: 26px;
 	left: 26px;
+	cursor: pointer;
 	border: none;
 }
 
-.modal-form-content {
+.add-file-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	background-color: #e8f1f6;
+	border-radius: 3px;
+	padding: 10px 0;
+	width: 420px;
+	height: 169px;
+}
+
+input[type='file'] {
 	display: none;
+}
+
+.label-add-photo {
+	border-radius: 50px;
+	color: #306685;
+	background-color: #cbd6dc;
+	cursor: pointer;
+	border: none;
+	border-radius: 50px;
+	font-size: 14px;
+	font-weight: 600;
+	padding: 1em 2em;
+	margin-top: 10px;
+}
+
+.photo-logo {
+	background: url('./icons/photo-icon.png');
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	width: 68.14px;
+	height: 59.62px;
+}
+
+.add-file-container > small {
+	padding-bottom: 10px;
+	font-size: 10px;
+	font-family: 'Work Sans';
+	color: #444444;
+}
+.add-file-container > select:focus {
+	border: none;
+}
+
+.modal-label {
+	font-size: 14px;
+	font-weight: 600;
+	margin: 10px 0;
+}
+
+.modal-input {
+	height: 50px;
+	width: 100%;
+	font-size: 1.2em;
+	border: none;
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+	margin: 0.7em 0;
+}
+
+.ajout-photo > input[type='submit'] {
+	border: none;
+	width: 236px;
+	height: 36px;
+	cursor: pointer;
 }
