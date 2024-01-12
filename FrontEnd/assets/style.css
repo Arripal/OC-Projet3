@@ -329,7 +329,7 @@ footer nav ul {
 
 .logo {
 	margin-top: 0.2em;
-	background: url('./images/Vector.png');
+	background: url('./icons/Vector.png');
 	background-repeat: no-repeat;
 	height: 20px;
 	width: 20px;
@@ -538,8 +538,12 @@ input[type='file'] {
 	font-family: 'Work Sans';
 	color: #444444;
 }
-.add-file-container > select:focus {
-	border: none;
+#photo-categorie {
+	position: relative;
+
+	border: 1px solid white;
+	cursor: pointer;
+	padding: 15px;
 }
 
 .modal-label {
