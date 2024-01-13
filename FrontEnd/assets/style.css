@@ -567,3 +567,18 @@ input[type='file'] {
 	height: 36px;
 	cursor: pointer;
 }
+
+.admin-header {
+	position: absolute;
+	top: -5.5%;
+	left: 0;
+	background-color: black;
+	height: 59px;
+	width: 100%;
+	color: white;
+}
+
+.span-error {
+	color: red;
+	margin-top: 5px;
+}

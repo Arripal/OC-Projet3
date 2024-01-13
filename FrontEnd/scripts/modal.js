@@ -1,22 +1,28 @@
 import { afficherProjets, getIdentificationToken } from './projets.js';
-const content_triggers = document.querySelectorAll('.trigger-modal-content');
+
+let token_identification = getIdentificationToken();
+let is_modal_open = false;
+const error = document.querySelector('.span-error');
+const projets = await fetch('http://localhost:5678/api/works').then((projets) =>
+	projets.json()
+);
+
 const gallery = document.querySelector('.modal-gallery');
-const content_containers = document.querySelectorAll('.content-wrapper');
-const token_identification = getIdentificationToken();
+let menu = document.getElementById('photo-categorie');
+const ajout_photo = document.querySelector('.form-ajout-photo-input');
 
 export function toggleModal() {
 	const modal_container = document.querySelector('.modal-container');
 	const modal_triggers = document.querySelectorAll('.trigger-modal');
 
-	let isOpen = false;
-
 	modal_triggers.forEach((trigger) =>
 		trigger.addEventListener('click', () => {
-			isOpen = !isOpen;
+			is_modal_open = !is_modal_open;
 
 			modal_container.classList.toggle('modal-visible');
 
-			if (!isOpen) {
+			if (!is_modal_open) {
+				error.innerText = '';
 				content_containers[0].style.display = 'block';
 				content_containers[1].style.display = 'none';
 			}
@@ -25,15 +31,57 @@ export function toggleModal() {
 }
 
 function afficherForm() {
+	const content_containers = document.querySelectorAll('.content-wrapper');
 	content_containers.forEach((container) => {
-		let display_value = container.style.display === 'block' ? 'none' : 'block';
-		container.style.display = display_value;
+		let display_valeur = container.style.display === 'block' ? 'none' : 'block';
+		container.style.display = display_valeur;
 	});
 }
+async function ajouterProjet() {
+	// Recuperation des infos du formulaire
 
-function afficherCategories(categories) {
+	const form = document.querySelector('#add-photo');
+	const title = form.querySelector('#photo-title')?.value;
+	const image = form.querySelector('#photo').files[0];
+
+	let id = window.localStorage.getItem('categorieId');
+	console.log(title, image, id);
+	window.localStorage.removeItem('categorieId');
+	// Cas d'erreurs
+	if (!title || !image || !id) {
+		const error = document.querySelector('.span-error');
+		error.innerText = 'Veuillez remplir touts les champs du formulaires.';
+		form.appendChild(error);
+		return;
+	}
+
+	const formData = new FormData();
+	formData.append('title', title);
+	formData.append('category', id);
+	formData.append('image', image);
+	const reponse = await fetch('http://localhost:5678/api/works', {
+		method: 'POST',
+		headers: { Authorization: `Bearer ${token_identification}` },
+		body: formData,
+	});
+
+	if (!reponse.ok) {
+		console.log('error');
+		return;
+	}
+	gallery.innerHTML = '';
+	const projets = await fetch('http://localhost:5678/api/works').then(
+		(projets) => projets.json()
+	);
+	afficherProjets(projets, gallery, creerProjetModal);
+	return true;
+}
+async function afficherCategories() {
 	const form_categories = document.querySelector('select');
 
+	const categories = await fetch('http://localhost:5678/api/categories').then(
+		(categories) => categories.json()
+	);
 	const option = document.createElement('option');
 	option.innerText = '';
 	option.selected = true;
@@ -69,140 +117,70 @@ function creerProjetModal(projet) {
 
 	figure.appendChild(image);
 	figure.appendChild(delete_btn_container);
+
 	return figure;
 }
 
-async function ajouterProjet(form_data) {
-	const reponse = await fetch('http://localhost:5678/api/works', {
-		method: 'POST',
-		body: JSON.stringify(form_data),
+async function supprimerProjet(event) {
+	const projet_id = parseInt(event.target.dataset.id);
+
+	const reponse = await fetch(`http://localhost:5678/api/works/${projet_id}`, {
+		method: 'DELETE',
 		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${token_identification.token}`,
+			Authorization: `Bearer ${token_identification}`,
 		},
 	});
-	if (reponse.status === 200) {
-		console.log('Projet ajouté !');
+	if (!reponse.status === 200) {
+		console.log(reponse.body);
 	} else {
-		console.log('ERROR !!!!');
+		gallery.innerHTML = '';
+		const liste_projets = projets.filter((projet) => projet.id !== projet_id);
+		afficherProjets(liste_projets, gallery, creerProjetModal);
+		console.log(liste_projets);
 	}
 }
 
+function getCategoryId(event) {
+	let selectedOption = event.target.options[event.target.selectedIndex];
+	let categorieId = selectedOption.dataset.categorie;
+	window.localStorage.setItem('categorieId', categorieId);
+}
 // Exécution du code uniquement si l'admin du site est connectée
 
-if (token_identification.token) {
-	const projets = await fetch('http://localhost:5678/api/works').then(
-		(projets) => projets.json()
-	);
+if (token_identification) {
+	token_identification = token_identification.token;
 
-	const categories = await fetch('http://localhost:5678/api/categories').then(
-		(categories) => categories.json()
-	);
-
-	const delete_projets_boutons = document.querySelectorAll(
-		'.delete-projet-modal'
-	);
+	const content_triggers = document.querySelectorAll('.trigger-modal-content');
 
 	content_triggers.forEach((trigger) => {
 		trigger.addEventListener('click', afficherForm);
 	});
 
-	afficherCategories(categories);
+	afficherCategories();
 
 	afficherProjets(projets, gallery, creerProjetModal);
 
 	/****** Suppression des projets  ******/
 
+	const delete_projets_boutons = document.querySelectorAll(
+		'.delete-projet-modal'
+	);
+
 	delete_projets_boutons.forEach((delete_btn) => {
-		delete_btn.addEventListener('click', async function supprimerProjet(event) {
+		delete_btn.addEventListener('click', async (event) => {
 			event.preventDefault();
-			try {
-				const projet_id = parseInt(event.target.dataset.id);
-
-				const reponse = await fetch(
-					`http://localhost:5678/api/works/${projet_id}`,
-					{
-						method: 'DELETE',
-						headers: {
-							Authorization: `Bearer ${token_identification.token}`,
-						},
-					}
-				);
-				if (reponse.status === 200) {
-					//Afficher une liste a jour des projets
-					console.log('Delete  worked');
-
-					gallery.innerHTML = '';
-					const liste_projets = projets.filter(
-						(projet) => projet.id !== projet_id
-					);
-					console.log(liste_projets);
-					afficherProjets(liste_projets, gallery, creerProjetModal);
-				} else {
-					console.log(reponse.body);
-				}
-				//Gestion d'erreur fetch
-			} catch (error) {
-				console.log('error : ', error);
-			}
+			await supprimerProjet(event);
 		});
 	});
 
-	const ajout_photo = document.querySelector('.form-ajout-photo-input');
-
 	/*************** Récupération de l'id de la catégorie choisie *******/
 
-	let menu = document.getElementById('photo-categorie');
-
-	menu.addEventListener('change', function (event) {
-		let selectedOption = event.target.options[event.target.selectedIndex];
-		let categorieId = selectedOption.dataset.categorie;
-		window.localStorage.setItem('categorieId', categorieId);
-	});
+	menu.addEventListener('change', getCategoryId);
 	/******* Ajout des travaux ********/
 
-	ajout_photo.addEventListener('click', async function (event) {
-		try {
-			event.preventDefault();
+	ajout_photo.addEventListener('click', async (event) => {
+		event.preventDefault();
 
-			// Recuperation des infos du formulaire
-
-			const form = document.querySelector('#add-photo');
-			const title = form.querySelector('#photo-title').value;
-			const photo = form.querySelector('#photo').value;
-			let id = window.localStorage.getItem('categorieId');
-			window.localStorage.removeItem('categorieId');
-
-			const formData = new FormData();
-			formData.append('title', title);
-			formData.append('categorieId', Number(id));
-			formData.append('imageUrl', photo);
-			const entries = formData.entries();
-
-			for (const entry of entries) {
-				const [key, valeur] = entry;
-				console.log(`key: ${key}, valeur: ${valeur}`);
-			}
-
-			const reponse = await fetch(`http://localhost:5678/api/works`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'multipart/form-data',
-					Authorization: `Bearer ${token_identification}`,
-				},
-				body: formData,
-			});
-			if (reponse.status === 200) {
-				console.log('Projet ajouté !');
-			} else {
-				console.log('ERROR !!!!');
-			}
-			console.log(reponse);
-		} catch (error) {
-			console.log('error : ' + error);
-		}
+		await ajouterProjet();
 	});
 }
-
-//TODO : Ajouter le bandeau lorsque l'admin est connecté
-// TODO : Mettre en place l'ajout et la suppression des projets

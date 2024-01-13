@@ -17,6 +17,7 @@
 
 <body>
 	<script src="./scripts/projets.js" type="module"></script>
+	<script type="module" src="./scripts/modal.js"></script>
 	<aside class="modal-container">
 		<div class="background-modal trigger-modal"></div>
 		<div class="modal" role="dialog" aria-labelledby="modalPhotosTitle" aria-describedby="galleriePhotos">
@@ -50,6 +51,7 @@
 					<label for="photo-categorie" class="modal-label">Catégorie</label>
 					<br>
 					<select name="photo-categorie" id="photo-categorie" class="modal-input"></select>
+					<span class="span-error"></span>
 				</form>
 				<div class="ajout-photo">
 					<input type="submit" value="Valider" class="form-ajout-photo-input">
@@ -140,7 +142,7 @@
 		</nav>
 	</footer>
 
-	<script defer type="module" src="./scripts/modal.js"></script>
+
 </body>
 
 </html>
