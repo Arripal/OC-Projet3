@@ -16,9 +16,9 @@ export function toggleModal() {
 	const modal_triggers = document.querySelectorAll('.trigger-modal');
 
 	modal_triggers.forEach((trigger) =>
-		trigger.addEventListener('click', () => {
+		trigger.addEventListener('click', (event) => {
 			is_modal_open = !is_modal_open;
-
+			event.stopPropagation();
 			modal_container.classList.toggle('modal-visible');
 
 			if (!is_modal_open) {
@@ -122,14 +122,23 @@ function creerProjetModal(projet) {
 }
 
 async function supprimerProjet(event) {
-	const projet_id = parseInt(event.target.dataset.id);
-
+	const projet_id = Number(event.target.dataset.id);
+	// Comm avec le back-end
+	/*
+	
 	const reponse = await fetch(`http://localhost:5678/api/works/${projet_id}`, {
 		method: 'DELETE',
 		headers: {
 			Authorization: `Bearer ${token_identification}`,
 		},
 	});
+	*/
+	// Gestion de l'interface
+	gallery.innerHTML = '';
+	const liste_projets = projets.filter((projet) => projet.id !== projet_id);
+	afficherProjets(liste_projets, gallery, creerProjetModal);
+	console.log(liste_projets);
+	/*
 	if (!reponse.status === 200) {
 		console.log(reponse.body);
 	} else {
@@ -138,6 +147,7 @@ async function supprimerProjet(event) {
 		afficherProjets(liste_projets, gallery, creerProjetModal);
 		console.log(liste_projets);
 	}
+	*/
 }
 
 function getCategoryId(event) {
@@ -169,6 +179,7 @@ if (token_identification) {
 	delete_projets_boutons.forEach((delete_btn) => {
 		delete_btn.addEventListener('click', async (event) => {
 			event.preventDefault();
+			event.stopPropagation();
 			await supprimerProjet(event);
 		});
 	});
@@ -180,7 +191,7 @@ if (token_identification) {
 
 	ajout_photo.addEventListener('click', async (event) => {
 		event.preventDefault();
-
+		event.stopPropagation();
 		await ajouterProjet();
 	});
 }
