@@ -21,8 +21,10 @@ export function toggleModal() {
 
 	modal_triggers.forEach((trigger) =>
 		trigger.addEventListener('click', (event) => {
-			is_modal_open = !is_modal_open;
 			event.stopPropagation();
+
+			is_modal_open = !is_modal_open;
+
 			modal_container.classList.toggle('modal-visible');
 
 			if (!is_modal_open) {
@@ -41,16 +43,15 @@ function afficherForm() {
 	});
 }
 async function ajouterProjet() {
-	// Recuperation des infos du formulaire
-
 	const form = document.querySelector('#add-photo');
 	const title = form.querySelector('#photo-title')?.value;
 	const image = form.querySelector('#photo').files[0];
 
 	let id = window.localStorage.getItem('categorieId');
-	console.log(title, image, id);
 	window.localStorage.removeItem('categorieId');
+
 	// Cas d'erreurs
+
 	if (!title || !image || !id) {
 		const error = document.querySelector('.span-error');
 		error.innerText = 'Veuillez remplir touts les champs du formulaires.';
@@ -62,6 +63,7 @@ async function ajouterProjet() {
 	formData.append('title', title);
 	formData.append('category', id);
 	formData.append('image', image);
+
 	const reponse = await fetch('http://localhost:5678/api/works', {
 		method: 'POST',
 		headers: { Authorization: `Bearer ${token_identification}` },
@@ -164,7 +166,13 @@ if (token_identification) {
 	ajout_photo.addEventListener('click', async (event) => {
 		event.preventDefault();
 		event.stopPropagation();
-		await ajouterProjet();
+		try {
+			await ajouterProjet();
+			const projets = await getProjets();
+			afficherProjets(projets, gallery, creerProjetModal);
+		} catch (error) {
+			console.log('error', error);
+		}
 	});
 
 	/****** Suppression des projets  ******/
@@ -177,10 +185,13 @@ if (token_identification) {
 		delete_btn.addEventListener('click', async (event) => {
 			event.preventDefault();
 			event.stopPropagation();
-			const isDeleted = await supprimerProjet(event);
-			if (!isDeleted) return;
-			const projets = await getProjets();
-			afficherProjets(projets, gallery, creerProjetModal);
+			try {
+				await supprimerProjet(event);
+				const projets = await getProjets();
+				afficherProjets(projets, gallery, creerProjetModal);
+			} catch (error) {
+				console.log(error);
+			}
 		});
 	});
 
