@@ -2,8 +2,7 @@ import { afficherProjets, getIdentificationToken } from './projets.js';
 
 let token_identification = getIdentificationToken();
 let is_modal_open = false;
-const error = document.querySelector('.span-error');
-const content_containers = document.querySelectorAll('.content-wrapper');
+
 const gallery = document.querySelector('.modal-gallery');
 let menu = document.getElementById('photo-categorie');
 const ajout_photo = document.querySelector('.form-ajout-photo-input');
@@ -13,6 +12,16 @@ async function getProjets() {
 		(projets) => projets.json()
 	);
 	return projets;
+}
+
+function resetModalContent(modal_state) {
+	const content_containers = document.querySelectorAll('.content-wrapper');
+	const error = document.querySelector('.span-error');
+	if (!modal_state) {
+		error.innerText = '';
+		content_containers[0].style.display = 'block';
+		content_containers[1].style.display = 'none';
+	}
 }
 
 export function toggleModal() {
@@ -26,26 +35,23 @@ export function toggleModal() {
 			is_modal_open = !is_modal_open;
 
 			modal_container.classList.toggle('modal-visible');
-
-			if (!is_modal_open) {
-				error.innerText = '';
-				content_containers[0].style.display = 'block';
-				content_containers[1].style.display = 'none';
-			}
+			//Reset du contenu de la modal lors de sa fermeture
+			resetModalContent(is_modal_open);
 		})
 	);
 }
 
 function afficherForm() {
+	const content_containers = document.querySelectorAll('.content-wrapper');
 	content_containers.forEach((container) => {
 		let display_valeur = container.style.display === 'block' ? 'none' : 'block';
 		container.style.display = display_valeur;
 	});
 }
-async function ajouterProjet() {
+async function ajouterProjet(token_identification) {
 	const form = document.querySelector('#add-photo');
 	const title = form.querySelector('#photo-title')?.value;
-	const image = form.querySelector('#photo').files[0];
+	const image = form.querySelector('#photo')?.files[0];
 
 	let id = window.localStorage.getItem('categorieId');
 	window.localStorage.removeItem('categorieId');
@@ -63,21 +69,24 @@ async function ajouterProjet() {
 	formData.append('title', title);
 	formData.append('category', id);
 	formData.append('image', image);
+	try {
+		const reponse = await fetch('http://localhost:5678/api/works', {
+			method: 'POST',
+			headers: { Authorization: `Bearer ${token_identification.token}` },
+			body: formData,
+		});
 
-	const reponse = await fetch('http://localhost:5678/api/works', {
-		method: 'POST',
-		headers: { Authorization: `Bearer ${token_identification}` },
-		body: formData,
-	});
+		if (!reponse.ok) {
+			console.log("Erreur, impossible d'ajouter votre projet");
+			return;
+		}
 
-	if (!reponse.ok) {
-		console.log("Erreur, impossible d'ajouter votre projet");
-		return;
+		const projets = await getProjets();
+
+		afficherProjets(projets, gallery, creerProjetModal);
+	} catch (error) {
+		console.log("Erreur pendant l'exécution de la requête :", error);
 	}
-
-	const projets = await getProjets();
-
-	afficherProjets(projets, gallery, creerProjetModal);
 }
 async function afficherCategories() {
 	const form_categories = document.querySelector('select');
@@ -124,7 +133,7 @@ function creerProjetModal(projet) {
 	return figure;
 }
 
-async function supprimerProjet(event) {
+async function supprimerProjet(event, token_identification) {
 	try {
 		const projet_id = Number(event.target.dataset.id);
 
@@ -133,7 +142,7 @@ async function supprimerProjet(event) {
 			{
 				method: 'DELETE',
 				headers: {
-					Authorization: `Bearer ${token_identification}`,
+					Authorization: `Bearer ${token_identification.token}`,
 				},
 			}
 		);
@@ -151,8 +160,6 @@ function getCategoryId(event) {
 // Exécution du code uniquement si l'admin du site est connectée
 
 if (token_identification) {
-	token_identification = token_identification.token;
-
 	afficherCategories();
 	const projets = await getProjets();
 	afficherProjets(projets, gallery, creerProjetModal);
@@ -167,7 +174,7 @@ if (token_identification) {
 		event.preventDefault();
 		event.stopPropagation();
 		try {
-			await ajouterProjet();
+			await ajouterProjet(token_identification);
 			const projets = await getProjets();
 			afficherProjets(projets, gallery, creerProjetModal);
 		} catch (error) {
@@ -186,7 +193,7 @@ if (token_identification) {
 			event.preventDefault();
 			event.stopPropagation();
 			try {
-				await supprimerProjet(event);
+				await supprimerProjet(event, token_identification);
 				const projets = await getProjets();
 				afficherProjets(projets, gallery, creerProjetModal);
 			} catch (error) {
