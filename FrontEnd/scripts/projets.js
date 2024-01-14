@@ -33,6 +33,7 @@ export function creerProjet(projet) {
 
 export function afficherProjets(projets, gallery, creerProjetFn) {
 	try {
+		gallery.innerHTML = '';
 		const projets_array = Array.from(projets);
 		projets_array.map((projet) => {
 			gallery.appendChild(creerProjetFn(projet));

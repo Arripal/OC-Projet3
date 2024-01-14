@@ -3,20 +3,26 @@ import { afficherProjets, getIdentificationToken } from './projets.js';
 let token_identification = getIdentificationToken();
 let is_modal_open = false;
 const error = document.querySelector('.span-error');
-const projets = await fetch('http://localhost:5678/api/works').then((projets) =>
-	projets.json()
-);
-
+const content_containers = document.querySelectorAll('.content-wrapper');
 const gallery = document.querySelector('.modal-gallery');
 let menu = document.getElementById('photo-categorie');
 const ajout_photo = document.querySelector('.form-ajout-photo-input');
+
+async function getProjets() {
+	const projets = await fetch('http://localhost:5678/api/works').then(
+		(projets) => projets.json()
+	);
+	return projets;
+}
 
 export function toggleModal() {
 	const modal_container = document.querySelector('.modal-container');
 	const modal_triggers = document.querySelectorAll('.trigger-modal');
 
 	modal_triggers.forEach((trigger) =>
-		trigger.addEventListener('click', () => {
+		trigger.addEventListener('click', (event) => {
+			event.stopPropagation();
+
 			is_modal_open = !is_modal_open;
 
 			modal_container.classList.toggle('modal-visible');
@@ -31,23 +37,21 @@ export function toggleModal() {
 }
 
 function afficherForm() {
-	const content_containers = document.querySelectorAll('.content-wrapper');
 	content_containers.forEach((container) => {
 		let display_valeur = container.style.display === 'block' ? 'none' : 'block';
 		container.style.display = display_valeur;
 	});
 }
 async function ajouterProjet() {
-	// Recuperation des infos du formulaire
-
 	const form = document.querySelector('#add-photo');
 	const title = form.querySelector('#photo-title')?.value;
 	const image = form.querySelector('#photo').files[0];
 
 	let id = window.localStorage.getItem('categorieId');
-	console.log(title, image, id);
 	window.localStorage.removeItem('categorieId');
+
 	// Cas d'erreurs
+
 	if (!title || !image || !id) {
 		const error = document.querySelector('.span-error');
 		error.innerText = 'Veuillez remplir touts les champs du formulaires.';
@@ -59,6 +63,7 @@ async function ajouterProjet() {
 	formData.append('title', title);
 	formData.append('category', id);
 	formData.append('image', image);
+
 	const reponse = await fetch('http://localhost:5678/api/works', {
 		method: 'POST',
 		headers: { Authorization: `Bearer ${token_identification}` },
@@ -66,15 +71,13 @@ async function ajouterProjet() {
 	});
 
 	if (!reponse.ok) {
-		console.log('error');
+		console.log("Erreur, impossible d'ajouter votre projet");
 		return;
 	}
-	gallery.innerHTML = '';
-	const projets = await fetch('http://localhost:5678/api/works').then(
-		(projets) => projets.json()
-	);
+
+	const projets = await getProjets();
+
 	afficherProjets(projets, gallery, creerProjetModal);
-	return true;
 }
 async function afficherCategories() {
 	const form_categories = document.querySelector('select');
@@ -122,21 +125,21 @@ function creerProjetModal(projet) {
 }
 
 async function supprimerProjet(event) {
-	const projet_id = parseInt(event.target.dataset.id);
+	try {
+		const projet_id = Number(event.target.dataset.id);
 
-	const reponse = await fetch(`http://localhost:5678/api/works/${projet_id}`, {
-		method: 'DELETE',
-		headers: {
-			Authorization: `Bearer ${token_identification}`,
-		},
-	});
-	if (!reponse.status === 200) {
-		console.log(reponse.body);
-	} else {
-		gallery.innerHTML = '';
-		const liste_projets = projets.filter((projet) => projet.id !== projet_id);
-		afficherProjets(liste_projets, gallery, creerProjetModal);
-		console.log(liste_projets);
+		const reponse = await fetch(
+			`http://localhost:5678/api/works/${projet_id}`,
+			{
+				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${token_identification}`,
+				},
+			}
+		);
+		return reponse.ok ? true : false;
+	} catch (error) {
+		console.log('error: : ', error);
 	}
 }
 
@@ -150,15 +153,27 @@ function getCategoryId(event) {
 if (token_identification) {
 	token_identification = token_identification.token;
 
-	const content_triggers = document.querySelectorAll('.trigger-modal-content');
-
-	content_triggers.forEach((trigger) => {
-		trigger.addEventListener('click', afficherForm);
-	});
-
 	afficherCategories();
-
+	const projets = await getProjets();
 	afficherProjets(projets, gallery, creerProjetModal);
+
+	/*************** Récupération de l'id de la catégorie choisie *******/
+
+	menu.addEventListener('change', getCategoryId);
+
+	/******* Ajout des travaux ********/
+
+	ajout_photo.addEventListener('click', async (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		try {
+			await ajouterProjet();
+			const projets = await getProjets();
+			afficherProjets(projets, gallery, creerProjetModal);
+		} catch (error) {
+			console.log('error', error);
+		}
+	});
 
 	/****** Suppression des projets  ******/
 
@@ -169,18 +184,20 @@ if (token_identification) {
 	delete_projets_boutons.forEach((delete_btn) => {
 		delete_btn.addEventListener('click', async (event) => {
 			event.preventDefault();
-			await supprimerProjet(event);
+			event.stopPropagation();
+			try {
+				await supprimerProjet(event);
+				const projets = await getProjets();
+				afficherProjets(projets, gallery, creerProjetModal);
+			} catch (error) {
+				console.log(error);
+			}
 		});
 	});
 
-	/*************** Récupération de l'id de la catégorie choisie *******/
+	const content_triggers = document.querySelectorAll('.trigger-modal-content');
 
-	menu.addEventListener('change', getCategoryId);
-	/******* Ajout des travaux ********/
-
-	ajout_photo.addEventListener('click', async (event) => {
-		event.preventDefault();
-
-		await ajouterProjet();
+	content_triggers.forEach((trigger) => {
+		trigger.addEventListener('click', afficherForm);
 	});
 }
