@@ -31,19 +31,28 @@ export function creerProjet(projet) {
 	return figure;
 }
 
+function errorMessage(errorString, parentElement) {
+	const error = document.createElement('span');
+	error.classList.add('span-error');
+	error.innerText = `${errorString}`;
+
+	parentElement.appendChild(error);
+}
 export function afficherProjets(projets, gallery, creerProjetFn) {
 	try {
 		gallery.innerHTML = '';
 		const projets_array = Array.from(projets);
+		if (projets_array.length < 1) {
+			errorMessage('Aucun projet a afficher pour le moment.', gallery);
+		}
 		projets_array.map((projet) => {
 			gallery.appendChild(creerProjetFn(projet));
 		});
 	} catch (error) {
-		const error_message = document.createElement('span');
-		error_message.classList.add('span-error');
-		error_message.innerText =
-			"Impossible d'afficher les projets, veuillez essayer à nouveau dans quelques minutes.";
-		gallery.appendChild(error_message);
+		errorMessage(
+			"Impossible d'afficher les projets, veuillez essayer à nouveau dans quelques minutes.",
+			gallery
+		);
 	}
 }
 const token_identification = getIdentificationToken();

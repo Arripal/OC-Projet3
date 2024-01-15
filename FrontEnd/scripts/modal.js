@@ -1,4 +1,8 @@
-import { afficherProjets, getIdentificationToken } from './projets.js';
+import {
+	afficherProjets,
+	creerProjet,
+	getIdentificationToken,
+} from './projets.js';
 
 let token_identification = getIdentificationToken();
 let is_modal_open = false;
@@ -16,9 +20,9 @@ async function getProjets() {
 
 function resetModalContent(modal_state) {
 	const content_containers = document.querySelectorAll('.content-wrapper');
-	const error = document.querySelector('.span-error');
+
 	if (!modal_state) {
-		error.innerText = '';
+		afficherMessage();
 		content_containers[0].style.display = 'block';
 		content_containers[1].style.display = 'none';
 	}
@@ -41,6 +45,12 @@ export function toggleModal() {
 	);
 }
 
+function afficherMessage(messageString = '') {
+	const message = document.querySelector('.message');
+	message.innerText = `${messageString}`;
+	return message;
+}
+
 function afficherForm() {
 	const content_containers = document.querySelectorAll('.content-wrapper');
 	content_containers.forEach((container) => {
@@ -59,9 +69,10 @@ async function ajouterProjet(token_identification) {
 	// Cas d'erreurs
 
 	if (!title || !image || !id) {
-		const error = document.querySelector('.span-error');
-		error.innerText = 'Veuillez remplir touts les champs du formulaires.';
-		form.appendChild(error);
+		const message = afficherMessage(
+			'Veuillez remplir touts les champs du formulaires.'
+		);
+		form.appendChild(message);
 		return;
 	}
 
@@ -81,9 +92,8 @@ async function ajouterProjet(token_identification) {
 			return;
 		}
 
-		const projets = await getProjets();
-
-		afficherProjets(projets, gallery, creerProjetModal);
+		form.querySelector('#photo-title').value = '';
+		return true;
 	} catch (error) {
 		console.log("Erreur pendant l'exécution de la requête :", error);
 	}
@@ -122,8 +132,9 @@ function creerProjetModal(projet) {
 	const delete_btn_container = document.createElement('div');
 	delete_btn_container.classList.add('delete_btn_container');
 
-	const delete_btn = document.createElement('button');
+	const delete_btn = document.createElement('input');
 	delete_btn.classList.add('delete-projet-modal');
+	delete_btn.type = 'button';
 	delete_btn.dataset.id = projet.id;
 	delete_btn_container.appendChild(delete_btn);
 
@@ -146,7 +157,14 @@ async function supprimerProjet(event, token_identification) {
 				},
 			}
 		);
-		return reponse.ok ? true : false;
+		if (!reponse.ok) {
+			console.log(
+				'Impossible de supprimer votre projet. Veuillez reessayer plus tard.'
+			);
+			return;
+		}
+
+		return true;
 	} catch (error) {
 		console.log('error: : ', error);
 	}
@@ -161,7 +179,9 @@ function getCategoryId(event) {
 
 if (token_identification) {
 	afficherCategories();
+
 	const projets = await getProjets();
+
 	afficherProjets(projets, gallery, creerProjetModal);
 
 	/*************** Récupération de l'id de la catégorie choisie *******/
@@ -172,11 +192,29 @@ if (token_identification) {
 
 	ajout_photo.addEventListener('click', async (event) => {
 		event.preventDefault();
-		event.stopPropagation();
+
 		try {
-			await ajouterProjet(token_identification);
+			const isAdded = await ajouterProjet(token_identification);
+
+			if (!isAdded) {
+				alert("Impossible d'ajouter votre projet pour le moment.");
+				return;
+			}
+
 			const projets = await getProjets();
+			const main_gallery = document.querySelector('.gallery');
+
 			afficherProjets(projets, gallery, creerProjetModal);
+
+			afficherProjets(projets, main_gallery, creerProjet);
+
+			// Affichage d'un message de succes, puis reset
+
+			afficherMessage('Votre projet a bien été ajouter.');
+
+			setTimeout(() => {
+				afficherMessage();
+			}, 2000);
 		} catch (error) {
 			console.log('error', error);
 		}
@@ -191,11 +229,19 @@ if (token_identification) {
 	delete_projets_boutons.forEach((delete_btn) => {
 		delete_btn.addEventListener('click', async (event) => {
 			event.preventDefault();
-			event.stopPropagation();
+
 			try {
-				await supprimerProjet(event, token_identification);
+				const isDeleted = await supprimerProjet(event, token_identification);
+				if (!isDeleted) {
+					alert('Impossible de supprimer votre projet pour le moment.');
+					return;
+				}
+
 				const projets = await getProjets();
+				const main_gallery = document.querySelector('.gallery');
+
 				afficherProjets(projets, gallery, creerProjetModal);
+				afficherProjets(projets, main_gallery, creerProjet);
 			} catch (error) {
 				console.log(error);
 			}
