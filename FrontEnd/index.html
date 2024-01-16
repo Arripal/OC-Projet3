@@ -18,6 +18,11 @@
 <body>
 	<script src="./scripts/projets.js" type="module"></script>
 	<script type="module" src="./scripts/modal.js"></script>
+	<header class="admin-edition">
+		<div class="logo">
+		</div>
+		<span class="edition-title">Mode édition</span>
+	</header>
 	<aside class="modal-container">
 		<div class="background-modal trigger-modal"></div>
 		<div class="modal" role="dialog" aria-labelledby="modalPhotosTitle" aria-describedby="galleriePhotos">
@@ -41,6 +46,9 @@
 						<label for="photo" class="label-add-photo">+ Ajouter photo</label>
 						<input type="file" name="photo" id="photo" accept="image/png, image/jpeg">
 						<small>jpg, png : 4mo max</small>
+
+						<img src="#" alt="projet a upload" class="image-visu">
+
 					</div>
 
 					<br>
@@ -51,10 +59,10 @@
 					<label for="photo-categorie" class="modal-label">Catégorie</label>
 					<br>
 					<select name="photo-categorie" id="photo-categorie" class="modal-input"></select>
-					<span class="span-error"></span>
+					<span class="message"></span>
 				</form>
 				<div class="ajout-photo">
-					<input type="button" class="form-ajout-photo-input" value="Valider">
+					<input type="submit" class="form-ajout-photo-input" value="Valider">
 				</div>
 			</div>
 		</div>
@@ -69,7 +77,7 @@
 				<li>projets</li>
 				<li>contact</li>
 				<li><a href="login.html" class="login-link">login</a></li>
-				<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
+				<li><img src="./assets/icons/instagram.png" alt="Instagram" class="instagram"></li>
 			</ul>
 		</nav>
 	</header>

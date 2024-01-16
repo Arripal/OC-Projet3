@@ -181,6 +181,12 @@ nav li a {
 li:hover {
 	color: #b1663c;
 }
+
+.instagram {
+	width: 19.35px;
+	height: 19.35px;
+	margin-top: 5px;
+}
 #introduction {
 	display: flex;
 	align-items: center;
@@ -501,7 +507,6 @@ footer nav ul {
 	align-items: center;
 	background-color: #e8f1f6;
 	border-radius: 3px;
-	padding: 10px 0;
 	width: 420px;
 	height: 169px;
 }
@@ -524,6 +529,7 @@ input[type='file'] {
 }
 
 .photo-logo {
+	margin-top: 8px;
 	background: url('./icons/photo-icon.png');
 	background-repeat: no-repeat;
 	background-position: center;
@@ -538,9 +544,15 @@ input[type='file'] {
 	font-family: 'Work Sans';
 	color: #444444;
 }
+
+.image-visu {
+	display: none;
+	width: 129px;
+	height: 100%;
+}
+
 #photo-categorie {
 	position: relative;
-
 	border: 1px solid white;
 	cursor: pointer;
 	padding: 15px;
@@ -566,19 +578,42 @@ input[type='file'] {
 	width: 236px;
 	height: 36px;
 	cursor: pointer;
+	background-color: #a7a7a7;
 }
 
-.admin-header {
-	position: absolute;
-	top: -5.5%;
+.modal-submit-input {
+	background-color: #1d6154 !important;
+}
+
+.admin-edition {
+	position: fixed;
+	top: -59px;
 	left: 0;
 	background-color: black;
 	height: 59px;
-	width: 100%;
-	color: white;
+	width: 100vw;
+	margin: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
-.span-error {
+.admin-edition .logo {
+	order: 1;
+	background: url('./icons/Vector.svg');
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.edition-title {
+	order: 2;
+	font-size: 16px;
+	padding-left: 7px;
+	color: white;
+	font-family: 400;
+}
+
+.message {
 	color: red;
 	margin-top: 5px;
 }

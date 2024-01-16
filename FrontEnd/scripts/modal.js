@@ -23,6 +23,8 @@ function resetModalContent(modal_state) {
 
 	if (!modal_state) {
 		afficherMessage();
+		const form = document.querySelector('#add-photo');
+		console.log(form);
 		content_containers[0].style.display = 'block';
 		content_containers[1].style.display = 'none';
 	}
@@ -39,6 +41,7 @@ export function toggleModal() {
 			is_modal_open = !is_modal_open;
 
 			modal_container.classList.toggle('modal-visible');
+
 			//Reset du contenu de la modal lors de sa fermeture
 			resetModalContent(is_modal_open);
 		})
@@ -58,6 +61,21 @@ function afficherForm() {
 		container.style.display = display_valeur;
 	});
 }
+
+function changeValiderButtonColor() {
+	const title = document.querySelector('#photo-title').value;
+	const image = document.querySelector('#photo').files[0];
+	const category = document.querySelector('select').value;
+
+	if (title && image && category) {
+		document.querySelector('.form-ajout-photo-input').style.backgroundColor =
+			'#1d6154';
+	} else {
+		document.querySelector('.form-ajout-photo-input').style.backgroundColor =
+			'#a7a7a7';
+	}
+}
+
 async function ajouterProjet(token_identification) {
 	const form = document.querySelector('#add-photo');
 	const title = form.querySelector('#photo-title')?.value;
@@ -88,7 +106,7 @@ async function ajouterProjet(token_identification) {
 		});
 
 		if (!reponse.ok) {
-			console.log("Erreur, impossible d'ajouter votre projet");
+			afficherMessage("Impossible d'ajouter votre projet pour l'instant.");
 			return;
 		}
 
@@ -137,14 +155,34 @@ function creerProjetModal(projet) {
 	delete_btn.type = 'button';
 	delete_btn.dataset.id = projet.id;
 	delete_btn_container.appendChild(delete_btn);
+	delete_btn.addEventListener('click', supprimerProjet);
 
 	figure.appendChild(image);
 	figure.appendChild(delete_btn_container);
 
 	return figure;
 }
+async function supprimerProjet(event) {
+	event.preventDefault();
+	event.stopPropagation();
+	try {
+		const isDeleted = await supprimerProjetInDB(event, token_identification);
+		if (!isDeleted) {
+			alert('Impossible de supprimer votre projet pour le moment.');
+			return;
+		}
 
-async function supprimerProjet(event, token_identification) {
+		const projets = await getProjets();
+		const main_gallery = document.querySelector('.gallery');
+
+		afficherProjets(projets, gallery, creerProjetModal);
+
+		afficherProjets(projets, main_gallery, creerProjet);
+	} catch (error) {
+		console.log(error);
+	}
+}
+async function supprimerProjetInDB(event, token_identification) {
 	try {
 		const projet_id = Number(event.target.dataset.id);
 
@@ -175,6 +213,27 @@ function getCategoryId(event) {
 	let categorieId = selectedOption.dataset.categorie;
 	window.localStorage.setItem('categorieId', categorieId);
 }
+
+function afficherImageForm() {
+	const image_visu = document.querySelector('.image-visu');
+	const label = document.querySelector('.label-add-photo');
+	const small = document.querySelector('small');
+	const logo = document.querySelector('.photo-logo');
+	const fichier = this.files[0];
+	if (fichier) {
+		const analyseur = new FileReader();
+		image_visu.style.display = 'block';
+		label.style.display = 'none';
+		logo.style.display = 'none';
+		small.style.display = 'none';
+		analyseur.readAsDataURL(fichier);
+
+		analyseur.addEventListener('load', function () {
+			image_visu.setAttribute('src', this.result);
+		});
+	}
+}
+
 // Exécution du code uniquement si l'admin du site est connectée
 
 if (token_identification) {
@@ -182,7 +241,22 @@ if (token_identification) {
 
 	const projets = await getProjets();
 
+	/**** Update du bouton valider *********/
+
+	const category = document.querySelector('select');
+	const title = document.querySelector('#photo-title');
+	const image = document.querySelector('#photo');
+
+	title.addEventListener('input', changeValiderButtonColor);
+	image.addEventListener('input', changeValiderButtonColor);
+	category.addEventListener('input', changeValiderButtonColor);
+
 	afficherProjets(projets, gallery, creerProjetModal);
+	/*** Visualisation de l'image lors de l'upload dans le form  *******/
+
+	const image_file = document.querySelector('#photo');
+
+	image_file.addEventListener('change', afficherImageForm);
 
 	/*************** Récupération de l'id de la catégorie choisie *******/
 
@@ -197,7 +271,6 @@ if (token_identification) {
 			const isAdded = await ajouterProjet(token_identification);
 
 			if (!isAdded) {
-				alert("Impossible d'ajouter votre projet pour le moment.");
 				return;
 			}
 
@@ -218,34 +291,6 @@ if (token_identification) {
 		} catch (error) {
 			console.log('error', error);
 		}
-	});
-
-	/****** Suppression des projets  ******/
-
-	const delete_projets_boutons = document.querySelectorAll(
-		'.delete-projet-modal'
-	);
-
-	delete_projets_boutons.forEach((delete_btn) => {
-		delete_btn.addEventListener('click', async (event) => {
-			event.preventDefault();
-
-			try {
-				const isDeleted = await supprimerProjet(event, token_identification);
-				if (!isDeleted) {
-					alert('Impossible de supprimer votre projet pour le moment.');
-					return;
-				}
-
-				const projets = await getProjets();
-				const main_gallery = document.querySelector('.gallery');
-
-				afficherProjets(projets, gallery, creerProjetModal);
-				afficherProjets(projets, main_gallery, creerProjet);
-			} catch (error) {
-				console.log(error);
-			}
-		});
 	});
 
 	const content_triggers = document.querySelectorAll('.trigger-modal-content');

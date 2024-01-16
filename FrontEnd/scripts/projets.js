@@ -15,6 +15,7 @@ function changeLoginLink() {
 	login_link.href = 'index.html';
 	login_link.style.fontWeight = 'bold';
 	login_link.style.color = '#000000';
+	return login_link;
 }
 
 export function creerProjet(projet) {
@@ -33,7 +34,7 @@ export function creerProjet(projet) {
 
 function errorMessage(errorString, parentElement) {
 	const error = document.createElement('span');
-	error.classList.add('span-error');
+	error.classList.add('message');
 	error.innerText = `${errorString}`;
 
 	parentElement.appendChild(error);
@@ -61,6 +62,12 @@ const token_identification = getIdentificationToken();
 const gallery = document.querySelector('.gallery');
 
 function afficherAdminPage() {
+	//Affichage du mode édition
+
+	const edition_header = document.querySelector('.admin-edition');
+	edition_header.style.top = '0';
+	document.querySelector('body').style.marginTop = '85px';
+
 	afficherProjets(projets, gallery, creerProjet);
 
 	//Suppression des filtres et ajout du lien de modification
@@ -86,7 +93,12 @@ function afficherAdminPage() {
 	portfolio_title.style.marginBottom = '99px';
 	portfolio_title.appendChild(modifier_projets);
 	toggleModal();
-	changeLoginLink();
+	const logout = changeLoginLink();
+	logout.addEventListener('click', () =>
+		window.localStorage.removeItem('token_identification')
+	);
+
+	//Deconnexion
 }
 
 token_identification
