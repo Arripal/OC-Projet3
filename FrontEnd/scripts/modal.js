@@ -24,7 +24,6 @@ function resetModalContent(modal_state) {
 	if (!modal_state) {
 		afficherMessage();
 		const form = document.querySelector('#add-photo');
-		console.log(form);
 		content_containers[0].style.display = 'block';
 		content_containers[1].style.display = 'none';
 	}
